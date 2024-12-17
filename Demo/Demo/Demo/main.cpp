@@ -72,12 +72,48 @@ void run() {
 
 			seconds--;
 			if (seconds <= 0) {
+				if (playerEalth>0)
 				PlayerTurn = true;
 			}
 			//Tocchi Finali:
 			Wait(22);
 			Clear();
 		}
+		//if (playerEalth>0)
+		//{
+		//	while (PlayerTurn) {
+		//		UseDoubleBuffering(false);
+		//		Disegni:
+		//		DrawBackground(b);
+		//		DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth);
+
+		//		Animazioni:
+		//		enemyAnimation(enemyY, movingUP);
+
+		//		Azioni:
+		//		if (LeftMousePressed()) {
+		//			int mX = MouseX();
+		//			int mY = MouseY();
+		//			if (statoDelMouse == false) {
+		//				Attacco:
+		//				if (isInAttacco(mX, mY)) {
+		//					DrawAttack(enemyY);
+		//					enemyEalth -= 15;
+		//					PlayerTurn = false;
+		//				}
+		//			}
+		//			statoDelMouse = true;
+		//		}
+		//		else {
+		//			statoDelMouse = false;
+		//		}
+
+		//		Tocchi Finali:
+		//		Wait(120);
+		//		Clear();
+		//	}
+		//}
+		/*Clear();*/
 		while (PlayerTurn) {
 			UseDoubleBuffering(false);
 			//Disegni:
@@ -108,7 +144,7 @@ void run() {
 			//Tocchi Finali:
 			Wait(120);
 			Clear();
-		}
+		
 	}
 	DrawBackground(b);
 	if (enemyEalth <= 0) {
@@ -188,7 +224,7 @@ void DrawAttack(int enemyY)
 		Wait(5);
 	}
 	DrawString(75, 0, "15", "Comic Sans MC", 15, Black, true);
-	Wait(500);
+	Wait(400);
 }
 
 void Movement(int& PlayerX, int& PlayerY)
