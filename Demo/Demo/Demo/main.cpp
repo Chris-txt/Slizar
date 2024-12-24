@@ -15,17 +15,18 @@ void Movement(int& PlayerX, int& PlayerY);
 
 void run() {
 	//UseDoubleBuffering(true);
-	int b = RandomInt(0, 255);
-	int enemyY = 40;
-	bool movingUP = true, PlayerTurn = true;
-	int enemyEalth = 100, playerEalth = 100;
-	bool statoDelMouse = false;
-	int seconds;
-	const int NumAttacchi = 14;
+	int b = RandomInt(0, 255);							//colore sfondo
+	int enemyY = 40;									//posizione verticale del nemico, serve per animazioni
+	bool movingUP = true;								//movingUP serve per decidere se il nemico si muove su o giù
+	bool PlayerTurn = true;								//vede se è il turno del giocatore
+	int enemyEalth = 100, playerEalth = 100;			//vita del nemico e del giocatore
+	bool statoDelMouse = false, PlayerColpito = false;	//prevede che alcuni comandi collegati al mouse e al player vengano ripetute troppo velocemente
+	int tempo;											//tempo del turno nemico
+	const int NumAttacchi = 14;							//Numero individuale degli attacchi
 
 	//battaglia
 	while (enemyEalth > 0 && playerEalth > 0) {
-		seconds = 100;
+		tempo = 100;
 		int PlayerX = 75, PlayerY = 75;
 		int PreviousX = PlayerX, PreviousY = PlayerY;
 		int AttackY = 5;
@@ -60,9 +61,12 @@ void run() {
 			//attacchi:
 			for (int i = 0; i < NumAttacchi; i++) {
 				DrawRectangle(AttackX[i], AttackY, 5, 5, White, White);
-				if (PlayerY<AttackY + 3 && PlayerY>AttackY - 3) {
-					if (PlayerX > AttackX[i] - 3 && PlayerX < AttackX[i] + 3) {
-						playerEalth -= 10;
+				if (PlayerColpito == false) {
+					if (PlayerY<AttackY + 5 && PlayerY>AttackY - 5) {
+						if (PlayerX > AttackX[i] - 5 && PlayerX < AttackX[i] + 5) {
+							playerEalth -= 10;
+							PlayerColpito = true;
+						}
 					}
 				}
 			}
@@ -70,9 +74,12 @@ void run() {
 			Present();
 			AttackY++;
 
-			seconds--;
-			if (seconds <= 0) {
+			tempo--;
+			if (tempo <= 0) {
 				PlayerTurn = true;
+			}
+			if (tempo % 20 == 0) {
+				PlayerColpito = false;
 			}
 			//Tocchi Finali:
 			Wait(22);
@@ -133,11 +140,13 @@ void DrawBackground(int blue)
 void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth)
 {
 	//Nemico
-	DrawCircle(75, enemyY, 20, Red, LightRed);
-	DrawCircle(75, enemyY, 7, White, LightGray);
-	DrawLine(75, enemyY - 5, 75, enemyY + 5, 1, Black);
-	DrawRectangle(25, 3, enemyEalth, 5, Green, 0U);
-	DrawRectangle(25, 93, playerEalth, 5, Green, Green);
+	DrawCircle(75, enemyY, 20, Red, LightRed);				//nemico											  
+	DrawCircle(75, enemyY, 7, White, LightGray);			//occhio del nemico (non che ci sono altri occhi)
+	DrawLine(75, enemyY - 5, 75, enemyY + 5, 1, Black);		//pupilla del nemico
+	DrawRectangle(24, 2, 101, 6, Red, LightGray);			//barra della vita persa nemica	
+	DrawRectangle(25, 3, enemyEalth, 5, Green, 0U);			//barra della vita nemica
+	DrawRectangle(25, 93, 100, 5, Red, Red);				//barra della vita persa del giocatore
+	DrawRectangle(25, 93, playerEalth, 5, Green, Green);	//barra della vita del giocatore
 	if (PlayerTurn) {
 		//Attacco
 		DrawRectangle(5, 70, 45, 15, Red, LightRed);
