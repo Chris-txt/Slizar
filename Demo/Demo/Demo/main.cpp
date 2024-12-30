@@ -10,27 +10,25 @@ void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth);
 void enemyAnimation(int& enemyY, bool& direction);
 bool isInAttacco(int mX, int mY); //trasformarlo in un int che trova quale azione è stata premuta
 void DrawAttack(int enemyY);
-
 void Movement(int& PlayerX, int& PlayerY);
+bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i);
 
 void run() {
-	//UseDoubleBuffering(true);
-	int b = RandomInt(0, 255);							//colore sfondo
-	int enemyY = 40;									//posizione verticale del nemico, serve per animazioni
-	bool movingUP = true;								//movingUP serve per decidere se il nemico si muove su o giù
-	bool PlayerTurn = true;								//vede se è il turno del giocatore
-	int enemyEalth = 100, playerEalth = 100;			//vita del nemico e del giocatore
-	bool statoDelMouse = false, PlayerColpito = false;	//prevede che alcuni comandi collegati al mouse e al player vengano ripetute troppo velocemente
-	int tempo;											//tempo del turno nemico
-	const int NumAttacchi = 14;							//Numero individuale degli attacchi
+	int b = RandomInt(0, 255);								//colore sfondo
+	int enemyY = 40;										//posizione verticale del nemico, serve per animazioni
+	bool movingUP = true;									//movingUP serve per decidere se il nemico si muove su o giù
+	bool PlayerTurn = true;									//vede se è il turno del giocatore
+	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
+	bool statoDelMouse = false, PlayerColpito = false;		//prevede che alcuni comandi collegati al mouse e al player vengano ripetute troppo velocemente
+	int tempo;												//tempo del turno nemico
+	const int NumAttacchi = 15;								//Numero individuale degli attacchi
 
 	//battaglia
 	while (enemyEalth > 0 && playerEalth > 0) {
-		tempo = 100;
-		int PlayerX = 75, PlayerY = 75;
-		int PreviousX = PlayerX, PreviousY = PlayerY;
-		int AttackY = 5;
-		int AttackX[NumAttacchi];
+		tempo = 350;										//La durata del turno nemico, non so in che misura però
+		int PlayerX = 75, PlayerY = 75;						//posizione del giocatore
+		int PreviousX = PlayerX, PreviousY = PlayerY;		//servono per evitare che il giocatore esca dal campo
+		int AttackY = 30, AttackX[NumAttacchi];				//La posizione degli attacchi nemici
 		for (int i = 0; i < NumAttacchi; i++) {
 			AttackX[i] = RandomInt(1, IMM2D_WIDTH);
 		}
@@ -62,15 +60,19 @@ void run() {
 			for (int i = 0; i < NumAttacchi; i++) {
 				DrawRectangle(AttackX[i], AttackY, 5, 5, White, White);
 				if (PlayerColpito == false) {
-					if (PlayerY<AttackY + 5 && PlayerY>AttackY - 5) {
-						if (PlayerX > AttackX[i] - 5 && PlayerX < AttackX[i] + 5) {
-							playerEalth -= 10;
-							PlayerColpito = true;
-						}
+					if (haPresoDanno(AttackX, AttackY, PlayerX, PlayerY, i)) {
+						playerEalth -= 10;
+						PlayerColpito = true;
 					}
 				}
 			}
-
+			if (AttackY > 85) {
+				for (int i = 0; i < NumAttacchi; i++) {
+					AttackX[i] = RandomInt(1, IMM2D_WIDTH);
+				}
+				AttackY = 20;
+			}
+			
 			Present();
 			AttackY++;
 
@@ -78,11 +80,11 @@ void run() {
 			if (tempo <= 0) {
 				PlayerTurn = true;
 			}
-			if (tempo % 20 == 0) {
+			if (tempo % 50 == 0) {
 				PlayerColpito = false;
 			}
 			//Tocchi Finali:
-			Wait(22);
+			Wait(25);
 			Clear();
 		}
 		while (PlayerTurn) {
@@ -159,6 +161,7 @@ void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth)
 		DrawString(98, 69, "Speciale", "Comic Sans MS", 8, LightGreen);
 	}
 	else {
+		//Campo di Combattimento
 		DrawRectangle(20, 50, 110, 30, Black, White);
 	}
 }
@@ -215,4 +218,14 @@ void Movement(int& PlayerX, int& PlayerY)
 	if (Movement == Left) {
 		PlayerX -= 2;
 	}
+}
+
+bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i)
+{
+	if (PlayerY<AttackY + 4 && PlayerY>AttackY - 5) {
+		if (PlayerX > AttackX[i] - 4 && PlayerX < AttackX[i] + 7) {
+			return true;
+		}
+	}
+	return false;
 }
