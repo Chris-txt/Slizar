@@ -5,11 +5,15 @@
 #define IMM2D_IMPLEMENTATION
 #include "immediate2d.h"
 
+#define NUM_ATTACCHI 12
+#define NUM_OGGETTI 3
+
 void DrawBackground(int blue);
 void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth);
 void enemyAnimation(int& enemyY, bool& direction);
-bool isInAttacco(int mX, int mY); //trasformarlo in un int che trova quale azione è stata premuta
+int qualeAzione(int mX, int mY);
 void DrawAttack(int enemyY);
+void DrawAzione(int NumOggetti[], int b);
 void Movement(int& PlayerX, int& PlayerY);
 bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i);
 
@@ -21,15 +25,15 @@ void run() {
 	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
 	bool statoDelMouse = false, PlayerColpito = false;		//prevede che alcuni comandi collegati al mouse e al player vengano ripetute troppo velocemente
 	int tempo;												//tempo del turno nemico
-	const int NumAttacchi = 15;								//Numero individuale degli attacchi
+	int NumPerOggetto[NUM_OGGETTI] = { 2,7,1 };				//La quantità disponibile per ogni oggetto
 
 	//battaglia
 	while (enemyEalth > 0 && playerEalth > 0) {
 		tempo = 350;										//La durata del turno nemico, non so in che misura però
 		int PlayerX = 75, PlayerY = 75;						//posizione del giocatore
 		int PreviousX = PlayerX, PreviousY = PlayerY;		//servono per evitare che il giocatore esca dal campo
-		int AttackY = 30, AttackX[NumAttacchi];				//La posizione degli attacchi nemici
-		for (int i = 0; i < NumAttacchi; i++) {
+		int AttackY = 30, AttackX[NUM_ATTACCHI];				//La posizione degli attacchi nemici
+		for (int i = 0; i < NUM_ATTACCHI; i++) {
 			AttackX[i] = RandomInt(1, IMM2D_WIDTH);
 		}
 
@@ -57,7 +61,7 @@ void run() {
 			}
 
 			//attacchi:
-			for (int i = 0; i < NumAttacchi; i++) {
+			for (int i = 0; i < NUM_ATTACCHI; i++) {
 				DrawRectangle(AttackX[i], AttackY, 5, 5, White, White);
 				if (PlayerColpito == false) {
 					if (haPresoDanno(AttackX, AttackY, PlayerX, PlayerY, i)) {
@@ -67,7 +71,7 @@ void run() {
 				}
 			}
 			if (AttackY > 85) {
-				for (int i = 0; i < NumAttacchi; i++) {
+				for (int i = 0; i < NUM_ATTACCHI; i++) {
 					AttackX[i] = RandomInt(1, IMM2D_WIDTH);
 				}
 				AttackY = 20;
@@ -88,13 +92,14 @@ void run() {
 			Clear();
 		}
 		while (PlayerTurn) {
-			UseDoubleBuffering(false);
+			UseDoubleBuffering(true);
 			//Disegni:
 			DrawBackground(b);
 			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth);
 
 			//Animazioni:
 			enemyAnimation(enemyY, movingUP);
+			Present();
 
 			//Azioni:
 			if (LeftMousePressed()) {
@@ -102,10 +107,14 @@ void run() {
 				int mY = MouseY();
 				if (statoDelMouse == false) {
 					//Attacco:
-					if (isInAttacco(mX, mY)) {
+					if (qualeAzione(mX, mY)==1) {
+						UseDoubleBuffering(false);
 						DrawAttack(enemyY);
 						enemyEalth -= 15;
 						PlayerTurn = false;
+					}
+					else if (qualeAzione(mX, mY) == 2) {
+						DrawAzione(NumPerOggetto, b);
 					}
 				}
 				statoDelMouse = true;
@@ -182,12 +191,15 @@ void enemyAnimation(int& enemyY, bool& direction)
 	}
 }
 
-bool isInAttacco(int mX, int mY)
+int qualeAzione(int mX, int mY)
 {
 	if ((mX >= 5 && mX <= 50)&&(mY >= 70 && mY <= 85)) {
-		return true;
+		return 1;
 	}
-	return false;
+	if ((mX >= 52 && mX <= 97) && (mY >= 70 && mY <= 85)) {
+		return 2;
+	}
+	return 0;
 }
 
 void DrawAttack(int enemyY)
@@ -201,6 +213,27 @@ void DrawAttack(int enemyY)
 	}
 	DrawString(75, 0, "15", "Comic Sans MC", 15, Black, true);
 	Wait(500);
+}
+
+void DrawAzione(int NumOggetti[], int b)
+{
+	while (LastKey() != 27) {
+		DrawRectangle(10, 5, 130, 80, Black, White);
+		DrawString(7, 85, "Premere ESC per uscire", "", 7, Black);
+		//oggetto 1
+		DrawString(10, 7, "Bomba", "Papyrus", 10, White);
+		DrawString(120, 7, "5", "", 10, White);
+		//oggetto 2
+		DrawString(10, 24, "Cura", "Papyrus", 10, White);
+		DrawString(120, 24, "10", "", 10, White);
+		//oggetto 3
+		DrawString(10, 40, "Super Cura", "Papyrus", 10, White);
+		DrawString(120, 40, "30", "", 10, White);
+		
+		Present();
+		Clear();
+		DrawBackground(b);
+	}
 }
 
 void Movement(int& PlayerX, int& PlayerY)
