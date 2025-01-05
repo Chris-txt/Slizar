@@ -220,22 +220,16 @@ void DrawAzione(int NumOggetti[], int b)
 	while (LastKey() != 27) {
 		DrawRectangle(10, 5, 130, 80, Black, White);
 		DrawString(7, 85, "Premere ESC per uscire", "", 7, Black);
-		for (int i = 1;i <= NUM_OGGETTI;i++) {
-			switch (i) {
-			case 1:
-				DrawString(10, i * 6, "Bomba", "Papyrus", 10, White);
-				DrawString(120, i * 6, "5", "", 10, White);				//siccome non riesco a mettere il numero di oggeti che puoi utilizzare, faccio che ogni oggetto costa qualcosa
-				break;
-			case 2:
-				DrawString(10, i * 11, "Cura", "Papyrus", 10, White);
-				DrawString(120, i * 11, "10", "", 10, White);
-				break;
-			case 3:
-				DrawString(10, i * 13, "Super Cura", "Papyrus", 10, White);
-				DrawString(120, i * 13, "30", "", 10, White);
-				break;
-			}
-		}
+		//oggetto 1
+		DrawString(10, 7, "Bomba", "Papyrus", 10, White);
+		DrawString(120, 7, "5", "", 10, White);
+		//oggetto 2
+		DrawString(10, 24, "Cura", "Papyrus", 10, White);
+		DrawString(120, 24, "10", "", 10, White);
+		//oggetto 3
+		DrawString(10, 40, "Super Cura", "Papyrus", 10, White);
+		DrawString(120, 40, "30", "", 10, White);
+		
 		Present();
 		Clear();
 		DrawBackground(b);
