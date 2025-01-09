@@ -1,6 +1,6 @@
 #define IMM2D_WIDTH 150
 #define IMM2D_HEIGHT 100
-#define IMM2D_SCALE 5
+#define IMM2D_SCALE 6
 
 #define IMM2D_IMPLEMENTATION
 #include "immediate2d.h"
@@ -9,14 +9,17 @@
 #define NUM_OGGETTI 3
 
 static const Color DarkRed = MakeColor(88, 0, 0);
+void DrawTitle(int b);
 void DrawBackground(int blue);
 void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti);
 void enemyAnimation(int& enemyY, bool& direction);
 int qualeAzione(int mX, int mY);
 void DrawAttack(int enemyY);
 void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn);
+bool DrawSpecial(int b, int enemyEalth);
 void Movement(int& PlayerX, int& PlayerY);
 bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i);
+void DrawDeath(bool isEnemyDead, int b);
 
 void run() {
 	UseDoubleBuffering(true);
@@ -29,6 +32,10 @@ void run() {
 	int tempo;												//tempo del turno nemico
 	int NumPerOggetto[NUM_OGGETTI] = { 2,7,1 };				//La quantità disponibile per ogni oggetto
 	int SoldiOggetti = 0;
+	
+	DrawTitle(b);
+
+
 
 	//battaglia
 	while (enemyEalth > 0 && playerEalth > 0) {
@@ -110,9 +117,10 @@ void run() {
 				if (statoDelMouse == false) {
 					//Attacco:
 					if (qualeAzione(mX, mY) == 1) {
-						UseDoubleBuffering(false);
 						DrawAttack(enemyY);
-						UseDoubleBuffering(true);
+						DrawString(75, 0, "15", "Comic Sans MC", 15, Black, true);
+						Present();
+						Wait(500);
 						enemyEalth -= 15;
 						PlayerTurn = false;
 						SoldiOggetti += 10;
@@ -120,6 +128,25 @@ void run() {
 					else if (qualeAzione(mX, mY) == 2) {
 						Clear();
 						DrawAzione(NumPerOggetto, b, playerEalth, enemyEalth, SoldiOggetti, PlayerTurn);
+					}
+					else if (qualeAzione(mX, mY) == 3) {
+						bool FattoCentro = DrawSpecial(b, enemyEalth);
+						DrawBackground(b);
+						DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti);
+						DrawAttack(enemyY);
+						if (FattoCentro) {
+							enemyEalth -= RandomInt(15, 30);
+							SoldiOggetti += 30;
+							DrawString(75, 0, "Bravo", "Comic Sans MC", 13, Black, true);
+						}
+						else {
+							enemyEalth -= RandomInt(0, 3);
+							SoldiOggetti += RandomInt(0, 5);
+							DrawString(75, 0, ":(", "Comic Sans MC", 15, Black, true);
+						}
+						Present();
+						PlayerTurn = false;
+						Wait(500);
 					}
 				}
 				statoDelMouse = true;
@@ -133,14 +160,39 @@ void run() {
 			Clear();
 		}
 	}
-	DrawBackground(b);
+	
 	if (enemyEalth <= 0) {
-		DrawString(75, 25, "Vittoria", "Comic Sans MC", 20, Green, true);
+		DrawDeath(true, b);
 	}
 	else {
-		DrawString(75, 25, "Game Over", "Comic Sans MC", 20, Red, true);
+		DrawDeath(false, b);
 	}
 	Present();
+}
+
+void DrawTitle(int b)
+{
+	for (int i = 100;i > 0;i -= 10) {
+		DrawCircle(75, 50, i, MakeColor(20, i, b), 0U);
+	}
+	DrawString(75, 5, "Slizar", "Papyrus", 20, White, true);
+	
+	while (LastKey() != Enter) {
+		int r = RandomInt(0, 255);
+		int g = RandomInt(0, 255);
+		DrawRectangle(55, 45, 40, 40, Black, MakeColor(r, g, b));
+		DrawCircle(75, 65, 15, Red, LightRed);
+		DrawCircle(75, 65, 5, White, LightGray);
+		DrawLine(75, 62, 75, 68, 1, Black);
+		Present();
+		Wait(150);
+	}
+	for (int i = 0;i < 100;i += 10) {
+		DrawCircle(75, 65, i, Black, 0U);
+		Present();
+		Wait(120);
+	}
+	Clear();
 }
 
 void DrawBackground(int blue)
@@ -208,6 +260,9 @@ int qualeAzione(int mX, int mY)
 	if ((mX >= 52 && mX <= 97) && (mY >= 70 && mY <= 85)) {
 		return 2;
 	}
+	if ((mX >= 99 && mX <= 145) && (mY >= 70 && mY <= 85)) {
+		return 3;
+	}
 	return 0;
 }
 
@@ -217,10 +272,9 @@ void DrawAttack(int enemyY)
 		//DrawLine(50, enemyY - 20, 51 + i, enemyY + i, 2, Black);
 		DrawPixel(52 + i, enemyY - 20 + i, DarkRed);
 		DrawPixel(52 + i, enemyY - 21 + i, DarkRed);
-		Wait(5);
+		Present();
+		Wait(7);
 	}
-	DrawString(75, 0, "15", "Comic Sans MC", 15, Black, true);
-	Wait(500);
 }
 
 void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn)
@@ -262,7 +316,48 @@ void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int&
 			playerEalth += 35;
 			PlayerTurn = false;
 		}
+		//DEBUG!! solo io posso sapere di questo comando
+		if (LastKey() == 'z') {
+			enemyEalth = 0;
+			PlayerTurn = false;
+		}
 	}
+}
+
+bool DrawSpecial(int b, int enemyEalth)
+{
+	int barraX = 10;
+	bool versoDestra = true;
+	while (LastKey() != 32) {
+		DrawBackground(b);
+		DrawRectangle(24, 2, 101, 6, Red, LightGray);
+		DrawRectangle(25, 3, enemyEalth, 5, Green, 0U);
+		DrawRectangle(10, 40, 90, 50, Red, White);
+		DrawRectangle(101, 40, 10, 50, Green, White);
+		DrawRectangle(112, 40, 20, 50, Red, White);
+		DrawString(5, 15, "Premi spazio per confermare", "Comic Sans MC", 8, Black);
+		if (versoDestra) {
+			barraX += 8;
+		}
+		else {
+			barraX -= 8;
+		}
+		DrawLine(barraX, 35, barraX, 95, 3, Black);
+		if (barraX >= 120) {
+			versoDestra = false;
+		}
+		if (barraX <= 10) {
+			versoDestra = true;
+		}
+		Present();
+		Clear();
+		Wait(40);
+	}
+
+	if (barraX > 100 && barraX < 111) {
+		return true;
+	}
+	return false;
 }
 
 void Movement(int& PlayerX, int& PlayerY)
@@ -290,4 +385,24 @@ bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i)
 		}
 	}
 	return false;
+}
+
+void DrawDeath(bool isEnemyDead, int b)
+{
+	if (isEnemyDead) {
+		Clear(Red);
+		DrawCircle(75, 50, 20, Black, Black);
+		Present();
+		Wait(1000);
+		DrawLine(55, 20, 90, 80, 9, Red);
+		Present();
+		Wait(3000);
+		Clear();
+		DrawBackground(b);
+		DrawString(75, 25, "Vittoria", "Comic Sans MC", 20, Green, true);
+	}
+	else {
+		DrawBackground(b);
+		DrawString(75, 25, "Game Over", "Comic Sans MC", 20, Red, true);
+	}
 }
