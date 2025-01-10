@@ -511,7 +511,7 @@ extern const int PixelScale;
 #endif
 
 #ifndef IMM2D_WINDOW_TITLE
-#define IMM2D_WINDOW_TITLE "Immediate2D"
+#define IMM2D_WINDOW_TITLE "Slizar"
 #endif
 
 const int Width = IMM2D_WIDTH;

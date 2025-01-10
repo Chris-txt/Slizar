@@ -21,10 +21,14 @@ void Movement(int& PlayerX, int& PlayerY);
 bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i);
 void DrawDeath(bool isEnemyDead, int b);
 
+static constexpr const char nemicopng[] = "nemico.png";
+static constexpr const char iconanemico[] = "miniNemico.png";
+static constexpr const char mortenemico[] = "nemicoMorto.png";
+
 void run() {
 	UseDoubleBuffering(true);
 	int b = RandomInt(0, 255);								//colore sfondo
-	int enemyY = 40;										//posizione verticale del nemico, serve per animazioni
+	int enemyY = 0;										//posizione verticale del nemico, serve per animazioni
 	bool movingUP = true;									//movingUP serve per decidere se il nemico si muove su o giù
 	bool PlayerTurn = true;									//vede se è il turno del giocatore
 	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
@@ -176,14 +180,12 @@ void DrawTitle(int b)
 		DrawCircle(75, 50, i, MakeColor(20, i, b), 0U);
 	}
 	DrawString(75, 5, "Slizar", "Papyrus", 20, White, true);
-	
+	const Image iconaDelNemico = LoadImage(iconanemico);
 	while (LastKey() != Enter) {
 		int r = RandomInt(0, 255);
 		int g = RandomInt(0, 255);
 		DrawRectangle(55, 45, 40, 40, Black, MakeColor(r, g, b));
-		DrawCircle(75, 65, 15, Red, LightRed);
-		DrawCircle(75, 65, 5, White, LightGray);
-		DrawLine(75, 62, 75, 68, 1, Black);
+		DrawImage(56, 46, iconaDelNemico);
 		Present();
 		Wait(150);
 	}
@@ -208,17 +210,14 @@ void DrawBackground(int blue)
 
 void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti)
 {
-	//Nemico
-	DrawCircle(75, enemyY, 20, Red, LightRed);				//nemico											  
-	DrawCircle(75, enemyY, 7, White, LightGray);			//occhio del nemico (non che ci sono altri occhi)
-	DrawLine(75, enemyY - 5, 75, enemyY + 5, 1, Black);		//pupilla del nemico
+	const Image nemico = LoadImage(nemicopng);				//carica immagine del nemico
+	DrawImage(43, enemyY, nemico);							//disegna immagine del nemico
 	DrawRectangle(24, 2, 101, 6, Red, LightGray);			//barra della vita persa nemica	
 	DrawRectangle(25, 3, enemyEalth, 5, Green, 0U);			//barra della vita nemica
 	DrawRectangle(25, 92, 100, 6, Red);						//barra della vita persa del giocatore
 	DrawRectangle(25, 92, playerEalth, 6, Green);			//barra della vita del giocatore
 	DrawRectangle(25, 88, 100, 3, DarkGray);				//barra dei soldi ottenibili
 	DrawRectangle(25, 88, monetaOggetti, 3, LightCyan);		//barra dei soldi ottenuti
-
 	if (PlayerTurn) {
 		//Attacco
 		DrawRectangle(5, 70, 45, 15, Red, LightRed);
@@ -240,13 +239,13 @@ void enemyAnimation(int& enemyY, bool& direction)
 {
 	if (direction) {
 		enemyY--;
-		if (enemyY < 30) {
+		if (enemyY < -5) {
 			direction = false;
 		}
 	}
 	else {
 		enemyY++;
-		if (enemyY > 46) {
+		if (enemyY > 15) {
 			direction = true;
 		}
 	}
@@ -269,9 +268,8 @@ int qualeAzione(int mX, int mY)
 void DrawAttack(int enemyY)
 {
 	for (int i = 0; i < 41; i++) {
-		//DrawLine(50, enemyY - 20, 51 + i, enemyY + i, 2, Black);
-		DrawPixel(52 + i, enemyY - 20 + i, DarkRed);
-		DrawPixel(52 + i, enemyY - 21 + i, DarkRed);
+		DrawPixel(52 + i, enemyY + i + 5, DarkRed);
+		DrawPixel(53 + i, enemyY + i + 5, DarkRed);
 		Present();
 		Wait(7);
 	}
@@ -389,11 +387,12 @@ bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i)
 
 void DrawDeath(bool isEnemyDead, int b)
 {
+	const Image NemicoUcciso = LoadImage(mortenemico);
 	if (isEnemyDead) {
 		Clear(Red);
-		DrawCircle(75, 50, 20, Black, Black);
+		DrawImage(43, 17, NemicoUcciso);
 		Present();
-		Wait(1000);
+		Wait(2000);
 		DrawLine(55, 20, 90, 80, 9, Red);
 		Present();
 		Wait(3000);
