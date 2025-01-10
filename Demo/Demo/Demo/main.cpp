@@ -11,24 +11,27 @@
 static const Color DarkRed = MakeColor(88, 0, 0);
 void DrawTitle(int b);
 void DrawBackground(int blue);
-void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti);
+void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti, Image nemico);
 void enemyAnimation(int& enemyY, bool& direction);
 int qualeAzione(int mX, int mY);
 void DrawAttack(int enemyY);
 void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn);
 bool DrawSpecial(int b, int enemyEalth);
 void Movement(int& PlayerX, int& PlayerY);
-bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i);
+bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i, int raggioX, bool SuperForma);
+void DrawSuperFormCutscene();
 void DrawDeath(bool isEnemyDead, int b);
 
 static constexpr const char nemicopng[] = "nemico.png";
 static constexpr const char iconanemico[] = "miniNemico.png";
 static constexpr const char mortenemico[] = "nemicoMorto.png";
+static constexpr const char supernemico[] = "nemicoFinale.png";
+static constexpr const char pericolo[] = "pericolo.png";
 
 void run() {
 	UseDoubleBuffering(true);
 	int b = RandomInt(0, 255);								//colore sfondo
-	int enemyY = 0;										//posizione verticale del nemico, serve per animazioni
+	int enemyY = 0;											//posizione verticale del nemico, serve per animazioni
 	bool movingUP = true;									//movingUP serve per decidere se il nemico si muove su o giù
 	bool PlayerTurn = true;									//vede se è il turno del giocatore
 	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
@@ -36,25 +39,28 @@ void run() {
 	int tempo;												//tempo del turno nemico
 	int NumPerOggetto[NUM_OGGETTI] = { 2,7,1 };				//La quantità disponibile per ogni oggetto
 	int SoldiOggetti = 0;
-	
+	bool superFormaAttiva = false;							//indicatore per la forma finale del nemico attova, serve per non ripetere la cutscene
+	Image nemico = LoadImage(nemicopng);					//carica immagine del nemico
+	const Image warning = LoadImage(pericolo);
+
 	DrawTitle(b);
-
-
 
 	//battaglia
 	while (enemyEalth > 0 && playerEalth > 0) {
-		tempo = 350;										//La durata del turno nemico, non so in che misura però
-		int PlayerX = 75, PlayerY = 75;						//posizione del giocatore
-		int PreviousX = PlayerX, PreviousY = PlayerY;		//servono per evitare che il giocatore esca dal campo
-		int AttackY = 30, AttackX[NUM_ATTACCHI];			//La posizione degli attacchi nemici
+		tempo = 350;											//La durata del turno nemico, non so in che misura però
+		int PlayerX = 75, PlayerY = 75;							//posizione del giocatore
+		int PreviousX = PlayerX, PreviousY = PlayerY;			//servono per evitare che il giocatore esca dal campo
+		int AttackY = 30, AttackX[NUM_ATTACCHI];				//La posizione degli attacchi nemici
+		int WarningX = RandomInt(25, 40), raggioX = WarningX;	//attacco speciale della nemico nella forma finale
 		for (int i = 0; i < NUM_ATTACCHI; i++) {
 			AttackX[i] = RandomInt(1, IMM2D_WIDTH);
 		}
 
 		while (!PlayerTurn) {
+
 			//Disegni:
 			DrawBackground(b);
-			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti);
+			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
 			DrawCircle(PlayerX, PlayerY, 2, Green, LightGreen);
 
 			//movimento del Player
@@ -76,8 +82,13 @@ void run() {
 			//attacchi:
 			for (int i = 0; i < NUM_ATTACCHI; i++) {
 				DrawRectangle(AttackX[i], AttackY, 5, 5, White, White);
+				if (enemyEalth <= 50) {
+					DrawImage(WarningX, 70, warning);
+					DrawLine(raggioX, 0, raggioX, 100, 15, Yellow);
+					DrawLine(raggioX, 0, raggioX, 100, 5, White);
+				}
 				if (PlayerColpito == false) {
-					if (haPresoDanno(AttackX, AttackY, PlayerX, PlayerY, i)) {
+					if (haPresoDanno(AttackX, AttackY, PlayerX, PlayerY, i, raggioX, superFormaAttiva)) {
 						playerEalth -= 10;
 						PlayerColpito = true;
 					}
@@ -88,6 +99,8 @@ void run() {
 					AttackX[i] = RandomInt(1, IMM2D_WIDTH);
 				}
 				AttackY = 20;
+				raggioX = WarningX;
+				WarningX = RandomInt(25, 125);
 			}
 			
 			Present();
@@ -108,7 +121,7 @@ void run() {
 		while (PlayerTurn && playerEalth > 0) {
 			//Disegni:
 			DrawBackground(b);
-			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti);
+			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
 
 			//Animazioni:
 			enemyAnimation(enemyY, movingUP);
@@ -136,7 +149,7 @@ void run() {
 					else if (qualeAzione(mX, mY) == 3) {
 						bool FattoCentro = DrawSpecial(b, enemyEalth);
 						DrawBackground(b);
-						DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti);
+						DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
 						DrawAttack(enemyY);
 						if (FattoCentro) {
 							enemyEalth -= RandomInt(15, 30);
@@ -160,8 +173,14 @@ void run() {
 			}
 
 			//Tocchi Finali:
-			Wait(120);
+			Wait(70);
 			Clear();
+		}
+
+		if (superFormaAttiva == false && enemyEalth <= 50) {
+			superFormaAttiva = true;
+			nemico = LoadImage(supernemico);
+			DrawSuperFormCutscene();
 		}
 	}
 	
@@ -208,9 +227,8 @@ void DrawBackground(int blue)
 	}
 }
 
-void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti)
+void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti, Image nemico)
 {
-	const Image nemico = LoadImage(nemicopng);				//carica immagine del nemico
 	DrawImage(43, enemyY, nemico);							//disegna immagine del nemico
 	DrawRectangle(24, 2, 101, 6, Red, LightGray);			//barra della vita persa nemica	
 	DrawRectangle(25, 3, enemyEalth, 5, Green, 0U);			//barra della vita nemica
@@ -316,8 +334,7 @@ void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int&
 		}
 		//DEBUG!! solo io posso sapere di questo comando
 		if (LastKey() == 'z') {
-			enemyEalth = 0;
-			PlayerTurn = false;
+			enemyEalth /= 2;
 		}
 	}
 }
@@ -375,14 +392,37 @@ void Movement(int& PlayerX, int& PlayerY)
 	}
 }
 
-bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i)
+bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i, int raggioX, bool SuperForma)
 {
 	if (PlayerY<AttackY + 4 && PlayerY>AttackY - 5) {
 		if (PlayerX > AttackX[i] - 4 && PlayerX < AttackX[i] + 8) {
 			return true;
 		}
 	}
+	if (SuperForma) {
+		if (PlayerX > raggioX - 11 && PlayerX < raggioX + 10) {
+			return true;
+		}
+	}
 	return false;
+}
+
+void DrawSuperFormCutscene()
+{
+	const Image SiluetteNemico = LoadImage(mortenemico);
+	Clear(DarkRed);
+	DrawImage(43, 17, SiluetteNemico);
+	Present();
+	Wait(2000);
+	for (int i = 100;i > 0;i -= 10) {
+		DrawCircle(75, 50, i, MakeColor(255, 255 - i, 0), 0U);
+	}
+	DrawImage(43, 17, SiluetteNemico);
+	Present();
+	Wait(2000);
+	DrawLine(74, 42, 74, 55, 2, Red);
+	Present();
+	Wait(2000);
 }
 
 void DrawDeath(bool isEnemyDead, int b)
