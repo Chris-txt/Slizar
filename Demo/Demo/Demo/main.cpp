@@ -9,7 +9,7 @@ using namespace std;
 
 #define NUM_ATTACCHI 12
 #define NUM_OGGETTI 3
-#define NUM_RAGGI 2
+#define NUM_RAGGI 3
 
 static const Color DarkRed = MakeColor(88, 0, 0);
 void DrawTitle(int b);
@@ -80,7 +80,6 @@ void run() {
 			//Disegni:
 			DrawBackground(b);
 			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
-			DrawCircle(PlayerX, PlayerY, 2, Green, LightGreen);
 
 			//movimento del Player
 			Movement(PlayerX, PlayerY);
@@ -129,9 +128,11 @@ void run() {
 				PlayMusic(53, 100);
 			}
 			
+			//Icona player:
+			DrawCircle(PlayerX, PlayerY, 2, Green, LightGreen);
 			Present();
+			
 			AttackY++;
-
 			tempo--;
 			iframe--;
 			if (tempo == 0 || playerEalth <= 0) {
@@ -239,7 +240,7 @@ void run() {
 	else {
 		DrawDeath(false, b);
 	}
-	Present();
+	CloseWindow();
 }
 
 void DrawTitle(int b)
@@ -453,12 +454,12 @@ void Movement(int& PlayerX, int& PlayerY)
 bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i, int raggioX[], bool SuperForma)
 {
 	if (PlayerY<AttackY + 4 && PlayerY>AttackY - 5) {
-		if (PlayerX > AttackX[i] - 4 && PlayerX < AttackX[i] + 8) {
+		if (PlayerX > AttackX[i] - 3 && PlayerX < AttackX[i] + 7) {
 			return true;
 		}
 	}
 	if (SuperForma && i < NUM_ATTACCHI) {
-		if (PlayerX > raggioX[i] - 9 && PlayerX < raggioX[i] + 12) {
+		if (PlayerX > raggioX[i] - 8 && PlayerX < raggioX[i] + 12) {
 			return true;
 		}
 	}
@@ -480,10 +481,7 @@ void DrawSuperFormCutscene()
 		PlayMusic(75, 70);
 		Wait(500);
 	}
-	DrawLine(76, 40, 76, 57, 2, Red);
 	PlayMusic(1500, 10);
-	Present();
-	Wait(1500);
 }
 
 void DrawDeath(bool isEnemyDead, int b)
@@ -513,4 +511,7 @@ void DrawDeath(bool isEnemyDead, int b)
 		PlayMusic(45, 2000);
 		PlayMusic(30, 3000);
 	}
+	DrawString(75, 60, "Premi ENTER per chiudere", "Comic Sans MC", 8, White, true);
+	Present();
+	while (LastKey() != Enter) {}
 }
