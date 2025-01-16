@@ -142,6 +142,7 @@
     <Image Include="nemicoMorto.png" />
     <Image Include="pericolo.png" />
     <Image Include="raggio.png" />
+    <Image Include="TitleScreen.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

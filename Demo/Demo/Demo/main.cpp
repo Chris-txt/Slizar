@@ -15,9 +15,9 @@ static const Color DarkRed = MakeColor(88, 0, 0);
 void DrawTitle(int b);
 void DrawBackground(int blue);
 void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int monetaOggetti, Image nemico);
-void enemyAnimation(int& enemyY, bool& direction);
+int enemyAnimation(int enemyY, int& direction);
 int qualeAzione(int mX, int mY);
-void DrawAttack(int enemyY);
+void DrawAttack(int enemyY, int Danni);
 int setRightAmountOfMoney(int SoldiOggetti);
 void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn);
 bool DrawSpecial(int b, int enemyEalth);
@@ -35,12 +35,13 @@ static constexpr const char barraspeciale[] = "barraSpeciale.png";
 static constexpr const char raggionemico[] = "raggio.png";
 static constexpr const char attacconemico[] = "attaccoNemico.png";
 static constexpr const char attaccosuper[] = "attaccoSuper.png";
+static constexpr const char schermotitolo[] = "TitleScreen.png";
 
 void run() {
 	UseDoubleBuffering(true);
-	int b = RandomInt(0, 255);								//colore sfondo
+	int b = RandomInt(0, 255);								//colore blu per lo sfondo
 	int enemyY = 0;											//posizione verticale del nemico, serve per animazioni
-	bool movingUP = true;									//movingUP serve per decidere se il nemico si muove su o giù
+	int Direction = 1;										//La direzione serve per decidere se il nemico si muove su o giù
 	bool PlayerTurn = true;									//vede se è il turno del giocatore
 	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
 	bool statoDelMouse = false;								//prevede che comandi collegati al mouse vengano ripetuti troppo velocemente
@@ -65,7 +66,6 @@ void run() {
 		bool PlayerColpito = false;									//fa in modo che il player abbia un pò di tempo per riprendersi dopo aver preso danno
 		int iframe = 0;												//periodo di immortalità dopo aver preso danno
 		int Danni;
-		string DanniStr;
 
 		for (int i = 0; i < NUM_ATTACCHI; i++) {
 			AttackX[i] = RandomInt(1, IMM2D_WIDTH);
@@ -154,7 +154,7 @@ void run() {
 			DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
 
 			//Animazioni:
-			enemyAnimation(enemyY, movingUP);
+			enemyY += enemyAnimation(enemyY, Direction);
 			Present();
 
 			//Azioni:
@@ -170,9 +170,7 @@ void run() {
 						else {
 							Danni = RandomInt(10, 15);
 						}
-						string DanniStr = to_string(Danni);
-						DrawAttack(enemyY);
-						DrawString(75, 0, DanniStr.c_str(), "Comic Sans MC", 15, Black, true);
+						DrawAttack(enemyY, Danni);
 						PlayMusic(63, 200);
 						PlayMusic(63, 100);
 						Present();
@@ -189,26 +187,24 @@ void run() {
 						bool FattoCentro = DrawSpecial(b, enemyEalth);
 						DrawBackground(b);
 						DrawScene(enemyY, enemyEalth, PlayerTurn, playerEalth, SoldiOggetti, nemico);
-						DrawAttack(enemyY);
 						if (FattoCentro) {
 							Danni = RandomInt(15, 25);
-							DanniStr = to_string(Danni);
 							enemyEalth -= Danni;
 							SoldiOggetti += 30;
-							DrawString(75, 0, DanniStr.c_str(), "Comic Sans MC", 13, Black, true);
+							DrawString(92, 0, ":)", "Comic Sans MC", 13, Black, true);
 							PlayMusic(56, 150);
 							PlayMusic(65, 150);
 							PlayMusic(70, 400);
 						}
 						else {
 							Danni = RandomInt(0, 3);
-							DanniStr = to_string(Danni) + ":(";
 							enemyEalth -= Danni;
 							SoldiOggetti += RandomInt(0, 5);
-							DrawString(75, 0, DanniStr.c_str(), "Comic Sans MC", 15, Black, true);
+							DrawString(90, 0, ":(", "Comic Sans MC", 15, Black, true);
 							PlayMusic(37, 300);
 							PlayMusic(32, 150);
 						}
+						DrawAttack(enemyY, Danni);
 						Present();
 						PlayerTurn = false;
 						Wait(500);
@@ -245,14 +241,20 @@ void run() {
 
 void DrawTitle(int b)
 {
-	for (int i = 100;i > 0;i -= 10) {
-		DrawCircle(75, 50, i, MakeColor(20, i, b), 0U);
-	}
-	DrawString(75, 5, "Slizar", "Papyrus", 20, White, true);
 	const Image iconaDelNemico = LoadImage(iconanemico);
+	const Image SchermataTitolo = LoadImage(schermotitolo);
 	while (LastKey() != Enter) {
 		int r = RandomInt(0, 255);
 		int g = RandomInt(0, 255);
+		if (LastBufferedKey() == 'z') {
+			DrawImage(0, 0, SchermataTitolo);
+		}
+		else {
+			for (int i = 100;i > 0;i -= 10) {
+				DrawCircle(75, 50, i, MakeColor(20, i, b), 0U);
+			}
+		}
+		DrawString(75, 5, "Slizar", "Papyrus", 20, White, true);
 		DrawRectangle(55, 45, 40, 40, Black, MakeColor(r, g, b));
 		DrawImage(56, 46, iconaDelNemico);
 		Present();
@@ -305,20 +307,15 @@ void DrawScene(int enemyY, int enemyEalth, bool PlayerTurn, int playerEalth, int
 	}
 }
 
-void enemyAnimation(int& enemyY, bool& direction)
+int enemyAnimation(int enemyY, int& direction)
 {
-	if (direction) {
-		enemyY--;
-		if (enemyY < -5) {
-			direction = false;
-		}
+	if (enemyY < -5) {
+		direction = 1;
 	}
-	else {
-		enemyY++;
-		if (enemyY > 15) {
-			direction = true;
-		}
+	if (enemyY > 15) {
+		direction = -1;
 	}
+	return direction;
 }
 
 int qualeAzione(int mX, int mY)
@@ -335,14 +332,16 @@ int qualeAzione(int mX, int mY)
 	return 0;
 }
 
-void DrawAttack(int enemyY)
+void DrawAttack(int enemyY, int Danni)
 {
+	string DanniStr = to_string(Danni);
 	for (int i = 0; i < 41; i++) {
 		DrawPixel(52 + i, enemyY + i + 5, DarkRed);
 		DrawPixel(53 + i, enemyY + i + 5, DarkRed);
 		Present();
 		Wait(7);
 	}
+	DrawString(75, 0, DanniStr.c_str(), "Comic Sans MC", 15, Black, true);
 }
 
 int setRightAmountOfMoney(int SoldiOggetti)

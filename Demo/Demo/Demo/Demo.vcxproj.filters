@@ -52,5 +52,8 @@
     <Image Include="attaccoSuper.png">
       <Filter>File di risorse</Filter>
     </Image>
+    <Image Include="TitleScreen.png">
+      <Filter>File di risorse</Filter>
+    </Image>
   </ItemGroup>
 </Project>
