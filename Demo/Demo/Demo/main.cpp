@@ -26,16 +26,16 @@ bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i, i
 void DrawSuperFormCutscene();
 void DrawDeath(bool isEnemyDead, int b);
 
-static constexpr const char nemicopng[] = "nemico.png";
-static constexpr const char iconanemico[] = "miniNemico.png";
-static constexpr const char mortenemico[] = "nemicoMorto.png";
-static constexpr const char supernemico[] = "nemicoFinale.png";
-static constexpr const char pericolo[] = "pericolo.png";
-static constexpr const char barraspeciale[] = "barraSpeciale.png";
-static constexpr const char raggionemico[] = "raggio.png";
-static constexpr const char attacconemico[] = "attaccoNemico.png";
-static constexpr const char attaccosuper[] = "attaccoSuper.png";
-static constexpr const char schermotitolo[] = "TitleScreen.png";
+static constexpr const char nemicopng[] = "Immagini/nemico.png";
+static constexpr const char iconanemico[] = "Immagini/miniNemico.png";
+static constexpr const char mortenemico[] = "Immagini/nemicoMorto.png";
+static constexpr const char supernemico[] = "Immagini/nemicoFinale.png";
+static constexpr const char pericolo[] = "Immagini/pericolo.png";
+static constexpr const char barraspeciale[] = "Immagini/barraSpeciale.png";
+static constexpr const char raggionemico[] = "Immagini/raggio.png";
+static constexpr const char attacconemico[] = "Immagini/attaccoNemico.png";
+static constexpr const char attaccosuper[] = "Immagini/attaccoSuper.png";
+static constexpr const char schermotitolo[] = "Immagini/TitleScreen.png";
 
 void run() {
 	UseDoubleBuffering(true);

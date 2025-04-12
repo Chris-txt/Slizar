@@ -132,18 +132,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="attaccoNemico.png" />
-    <Image Include="attaccoSuper.png" />
-    <Image Include="barraSpeciale.png" />
-    <Image Include="miniNemico.png" />
-    <Image Include="nemico.png" />
-    <Image Include="nemicoFinale.png" />
-    <Image Include="nemicoMorto.png" />
-    <Image Include="pericolo.png" />
-    <Image Include="raggio.png" />
-    <Image Include="TitleScreen.png" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

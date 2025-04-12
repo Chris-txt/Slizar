@@ -24,36 +24,4 @@
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="nemico.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="miniNemico.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="nemicoMorto.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="nemicoFinale.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="pericolo.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="barraSpeciale.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="raggio.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="attaccoNemico.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="attaccoSuper.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-    <Image Include="TitleScreen.png">
-      <Filter>File di risorse</Filter>
-    </Image>
-  </ItemGroup>
 </Project>
