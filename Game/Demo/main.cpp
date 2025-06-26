@@ -8,7 +8,6 @@
 using namespace std;
 
 #define NUM_ATTACCHI 12
-#define NUM_OGGETTI 3
 #define NUM_RAGGI 3
 
 static const Color DarkRed = MakeColor(88, 0, 0);
@@ -19,7 +18,7 @@ int enemyAnimation(int enemyY, int& direction);
 int qualeAzione(int mX, int mY);
 void DrawAttack(int enemyY, int Danni);
 int setRightAmountOfMoney(int SoldiOggetti);
-void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn);
+void DrawAzione(int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn);
 bool DrawSpecial(int b, int enemyEalth);
 void Movement(int& PlayerX, int& PlayerY);
 bool haPresoDanno(int AttackX[], int AttackY, int PlayerX, int PlayerY, int i, int raggioX[], bool SuperForma);
@@ -46,7 +45,6 @@ void run() {
 	int enemyEalth = 100, playerEalth = 100;				//vita del nemico e del giocatore
 	bool statoDelMouse = false;								//prevede che comandi collegati al mouse vengano ripetuti troppo velocemente
 	int tempo;												//tempo del turno nemico
-	int NumPerOggetto[NUM_OGGETTI] = { 2,7,1 };				//La quantità disponibile per ogni oggetto
 	int SoldiOggetti = 0;
 	bool superFormaAttiva = false;							//indicatore per la forma finale del nemico attova, serve per non ripetere la cutscene
 	Image nemico = LoadImage(nemicopng);					//carica immagine del nemico
@@ -181,7 +179,7 @@ void run() {
 					}
 					else if (qualeAzione(mX, mY) == 2) {
 						Clear();
-						DrawAzione(NumPerOggetto, b, playerEalth, enemyEalth, SoldiOggetti, PlayerTurn);
+						DrawAzione(b, playerEalth, enemyEalth, SoldiOggetti, PlayerTurn);
 					}
 					else if (qualeAzione(mX, mY) == 3) {
 						bool FattoCentro = DrawSpecial(b, enemyEalth);
@@ -272,11 +270,9 @@ void DrawTitle(int b)
 
 void DrawBackground(int blue)
 {
-	Color stu;
 	for (int i = 0; i < IMM2D_WIDTH; i += 5) {
 		for (int j = 0; j < IMM2D_HEIGHT; j += 5) {
-			stu = MakeColor(i, j, blue);
-			DrawRectangle(i, j, 5, 5, stu, 0U);
+			DrawRectangle(i, j, 5, 5, MakeColor(i, j, blue), 0U);
 		}
 	}
 }
@@ -352,7 +348,7 @@ int setRightAmountOfMoney(int SoldiOggetti)
 	return SoldiOggetti;
 }
 
-void DrawAzione(int NumOggetti[], int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn)
+void DrawAzione(int b, int& playerEalth, int& enemyEalth, int& SoldiOggetti, bool& PlayerTurn)
 {
 	//box
 	string oggetti[3] = { "(1) Bomba","(2) Cura","(3) Super Cura" };
